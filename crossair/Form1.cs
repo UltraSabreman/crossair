@@ -70,7 +70,8 @@ namespace crossair {
 					TrayIcon.Icon = crossair.Properties.Resources.off;
 					this.Opacity = 0;
 				}
-			}
+			} else if (e.Button == System.Windows.Forms.MouseButtons.Middle && e.Clicks == 2)
+				System.Environment.Exit(0);
 		}
 
 		protected override void OnFormClosing(FormClosingEventArgs e) {
@@ -86,7 +87,10 @@ namespace crossair {
 
 			while (true) {
 				try {
-					Reticule = new Bitmap("ret.bmp");
+					Bitmap tempBMP = new Bitmap("ret.bmp");
+					Reticule = new Bitmap(tempBMP);
+					tempBMP.Dispose();
+
 					this.Size = Reticule.Size;
 					DrawSpace.Size = Reticule.Size;
 
@@ -94,13 +98,10 @@ namespace crossair {
 					this.BackColor = this.TransparencyKey;
 					DrawSpace.Image = Reticule;
 					DrawSpace.Refresh();
-
 					return;
 				} catch (System.IO.FileNotFoundException) {
-					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel) {
+					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
 						System.Environment.Exit(0);
-						
-					}
 				} catch (System.ArgumentException) {
 					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
 						System.Environment.Exit(0);
