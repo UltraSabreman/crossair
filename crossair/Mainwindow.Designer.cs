@@ -32,6 +32,9 @@
 			// 
 			// TrayIcon
 			// 
+			this.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+			this.TrayIcon.BalloonTipText = "skjfojskdhlsdf";
+			this.TrayIcon.BalloonTipTitle = "sdfgsdfgsdfsgfgsf";
 			this.TrayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("TrayIcon.Icon")));
 			this.TrayIcon.Visible = true;
 			this.TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TrayIcon_MouseDoubleClick);

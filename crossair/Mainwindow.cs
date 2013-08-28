@@ -15,6 +15,7 @@ namespace crossair {
 		private bool OverlayOn = true;
 		private Bitmap Reticule = null;
 		private Timer refresh = new Timer();
+		private AsyncGlobalShortcuts test = new AsyncGlobalShortcuts();
 
 
 		public Overlay() {
@@ -27,12 +28,17 @@ namespace crossair {
 			refresh.Start();
 
 			this.Opacity = 0;
-		}
 
+			test.KeyPressed += new EventHandler<KeyPressedEventArgs>(TEST);
+			test.RegisterHotKey(Keys.Escape);
+		}
+		private void TEST(object source, KeyPressedEventArgs e) {
+			MessageBox.Show("Lol");
+		}
 		private void onTick(object source, EventArgs e) {
 			IntPtr GameWindow = new IntPtr();
 			try {
-				GameWindow = Process.GetProcesses().FirstOrDefault(x => x.MainWindowTitle.Contains("Planetside")).MainWindowHandle; //change me
+				GameWindow = Process.GetProcesses().FirstOrDefault(x => x.MainWindowTitle.Contains("Calculator")).MainWindowHandle; //change me
 			} catch (NullReferenceException) {
 				this.Close();
 				return;
