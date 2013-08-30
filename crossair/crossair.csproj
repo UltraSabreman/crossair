@@ -36,6 +36,10 @@
     <ApplicationIcon>Resources\test.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\..\..\..\..\Libraries\json.net\Bin\Net40\Newtonsoft.Json.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncGlobalShortcuts.cs" />
+    <Compile Include="dataReader.cs" />
     <Compile Include="Mainwindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -57,6 +62,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextEnterBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TextEnterBox.Designer.cs">
+      <DependentUpon>TextEnterBox.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Mainwindow.resx">
       <DependentUpon>Mainwindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -70,6 +81,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="TextEnterBox.resx">
+      <DependentUpon>TextEnterBox.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -90,6 +104,8 @@
     <None Include="Resources\off.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="paused.ico" />
+    <EmbeddedResource Include="Newtonsoft.Json.dll" />
     <Content Include="Resources\test.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

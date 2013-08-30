@@ -9,14 +9,19 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace crossair {
 	public partial class Overlay : Form {
 		private bool OverlayOn = true;
+		private bool ExitWithGame = true;
+		private bool paused = false;
 		private Bitmap Reticule = null;
-		private Timer refresh = new Timer();
+		private Timer refresh = new System.Windows.Forms.Timer();
 		private AsyncGlobalShortcuts test = new AsyncGlobalShortcuts();
-
+		private Regex windowTitle = new Regex("WINDOWTITLE", RegexOptions.Compiled);
+		private dataReader reader = new dataReader();
+		private bool updateIcon = false;
 
 		public Overlay() {
 			InitializeComponent();
@@ -29,29 +34,79 @@ namespace crossair {
 
 			this.Opacity = 0;
 
-			test.KeyPressed += new EventHandler<KeyPressedEventArgs>(TEST);
-			test.RegisterHotKey(Keys.Escape);
+			test.KeyPressed += new EventHandler<KeyPressedEventArgs>(hotkeyHandler);
+			test.RegisterHotKey(Keys.F12, Keys.LControlKey, Keys.A);
+
+			readOptions();
 		}
-		private void TEST(object source, KeyPressedEventArgs e) {
-			MessageBox.Show("Lol");
+
+		private void readOptions() {
+			reader.deserialize();
+			windowTitle = new Regex(reader.gameWindowTitle, RegexOptions.Compiled);
+			ExitWithGame = reader.closeWithGame;
+			exitToolStripMenuItem.Checked = ExitWithGame;
+			toggleToolStripMenuItem.Checked = OverlayOn;
 		}
+
+		private void onExit() {
+			TrayIcon.Visible = false;
+
+			string title = windowTitle.ToString();
+			if (title == null)
+				title = "";
+			reader.gameWindowTitle = title;
+			reader.closeWithGame = ExitWithGame;
+			reader.serialize();
+			test.Dispose();
+		}
+
+
+		private void hotkeyHandler(object source, KeyPressedEventArgs e) {
+
+		}
+
 		private void onTick(object source, EventArgs e) {
 			IntPtr GameWindow = new IntPtr();
+
 			try {
-				GameWindow = Process.GetProcesses().FirstOrDefault(x => x.MainWindowTitle.Contains("Calculator")).MainWindowHandle; //change me
-			} catch (NullReferenceException) {
-				this.Close();
-				return;
+				GameWindow = Process.GetProcesses().FirstOrDefault(x => windowTitle.Match(x.MainWindowTitle).Success).MainWindowHandle; //change me
+				if (updateIcon) {
+					paused = false;
+					if (OverlayOn) {
+						TrayIcon.Icon = crossair.Properties.Resources.on;
+						this.Opacity = 100;
+					} else {
+						TrayIcon.Icon = crossair.Properties.Resources.off;
+						this.Opacity = 0;
+					}
+
+					paused = true;
+					updateIcon = false;
+				}
+			} catch (System.NullReferenceException) {
+				if (ExitWithGame) {
+					this.Close();
+					return;
+				} else {
+					if (!updateIcon) {
+						TrayIcon.Icon = crossair.Properties.Resources.paused;
+						this.Opacity = 0;
+						paused = true;
+						updateIcon = true;
+					}
+					return;
+				}
 			}
 
 			if (!OverlayOn) return;
 
-			BringWindowToTop(this.Handle);
 			if (GetForegroundWindow() != GameWindow) {
 				this.Opacity = 0;
 				return;
-			} else
+			} else {
 				this.Opacity = 100;
+				BringWindowToTop(this.Handle);
+			}
 			
 
 			RECT tempSize = new RECT();
@@ -66,26 +121,30 @@ namespace crossair {
 		private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e) {
 			if (e.Button == System.Windows.Forms.MouseButtons.Right && e.Clicks == 2) 
 				loadImage();
-			else if (e.Button == System.Windows.Forms.MouseButtons.Left && e.Clicks == 2) {
-				OverlayOn = !OverlayOn;
-
-				if (OverlayOn) {
-					TrayIcon.Icon = crossair.Properties.Resources.on;
-					this.Opacity = 100;
-				} else {
-					TrayIcon.Icon = crossair.Properties.Resources.off;
-					this.Opacity = 0;
-				}
-			} else if (e.Button == System.Windows.Forms.MouseButtons.Middle && e.Clicks == 2)
-				System.Environment.Exit(0);
+			else if (e.Button == System.Windows.Forms.MouseButtons.Left && e.Clicks == 2)
+				toggle();
 		}
 
 		protected override void OnFormClosing(FormClosingEventArgs e) {
 			TrayIcon.Visible = false;
-			//TrayIcon.Dispose();
 			base.OnFormClosing(e);
 		}
 
+		private void toggle() {
+			if (paused) return;
+
+			OverlayOn = !OverlayOn;
+
+			if (OverlayOn) {
+				toggleToolStripMenuItem.Checked = true;
+				TrayIcon.Icon = crossair.Properties.Resources.on;
+				this.Opacity = 100;
+			} else {
+				toggleToolStripMenuItem.Checked = false;
+				TrayIcon.Icon = crossair.Properties.Resources.off;
+				this.Opacity = 0;
+			}
+		}
 
 		private void loadImage() {
 			if (Reticule != null)
@@ -148,6 +207,47 @@ namespace crossair {
 			public int Top;
 			public int Right;
 			public int Bottom;
+		}
+
+		private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
+			onExit();
+			this.Close();
+		}
+
+		private void optionsToolStripMenuItem_Click(object sender, EventArgs e) {
+			TextEnterBox temp = new TextEnterBox(windowTitle.ToString());
+			temp.onClose += new TextEnterBox.test(getWinTitle);
+			temp.Show();
+		}
+
+		private void getWinTitle(string t) {
+			try {
+				windowTitle = new Regex(t, RegexOptions.Compiled);
+			} catch(System.ArgumentException) {
+				System.Windows.Forms.DialogResult res = MessageBox.Show("ERROR: Invalid Regex! \n Please use a simple string or correct your regex.", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+				if (res == System.Windows.Forms.DialogResult.Retry) {
+					TextEnterBox temp = new TextEnterBox(windowTitle.ToString());
+					temp.onClose += new TextEnterBox.test(getWinTitle);
+					temp.Show();
+				}
+			}
+		}
+
+		private void exitWithGameToolStripMenuItem_Click(object sender, EventArgs e) {
+			ExitWithGame = !ExitWithGame;
+			exitWithGameToolStripMenuItem.Checked = ExitWithGame;
+		}
+
+		private void toggleToolStripMenuItem_Click(object sender, EventArgs e) {
+			toggle();
+		}
+
+		private void ReloadImageMenuItem_Click(object sender, EventArgs e) {
+			loadImage();
+		}
+
+		private void Overlay_FormClosing(object sender, FormClosingEventArgs e) {
+			onExit();
 		}
 
 
