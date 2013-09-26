@@ -18,6 +18,23 @@ namespace crossair {
 
 			text = t;
 			textBox1.Text = text;
+			bindButton1.OnKeyAccept += new bindButton.KeysDone(tedst);
+		}
+		private void tedst(List<Keys> test) {
+			string str = "";
+			if (test == null || test.Count == 0)
+				str = "No Bind";
+			else {
+				int ind = 0;
+				foreach (Keys k in test) {
+					str += k.ToString();
+					if (ind < test.Count - 1)
+						str += " + ";
+					ind++;
+				}
+			}
+
+			MessageBox.Show(str);
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e) {
@@ -44,6 +61,7 @@ namespace crossair {
 			} else if (e.KeyCode == Keys.Escape) {
 				this.Close();
 			}
-		}	
+		}
+
 	}
 }

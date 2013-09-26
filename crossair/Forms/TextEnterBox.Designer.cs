@@ -27,6 +27,7 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
+			this.bindButton1 = new crossair.bindButton();
 			this.SuspendLayout();
 			// 
 			// Ok
@@ -67,11 +68,21 @@
 			this.label1.TabIndex = 3;
 			this.label1.Text = "Enter the name of the window you want to attach to (you can use regex):";
 			// 
+			// bindButton1
+			// 
+			this.bindButton1.Location = new System.Drawing.Point(15, 51);
+			this.bindButton1.Name = "bindButton1";
+			this.bindButton1.Size = new System.Drawing.Size(185, 23);
+			this.bindButton1.TabIndex = 4;
+			this.bindButton1.Text = "lol";
+			this.bindButton1.UseVisualStyleBackColor = true;
+			// 
 			// TextEnterBox
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(373, 86);
+			this.Controls.Add(this.bindButton1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.textBox1);
 			this.Controls.Add(this.Cancel);
@@ -89,5 +100,6 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.TextBox textBox1;
 		private System.Windows.Forms.Label label1;
+		private bindButton bindButton1;
 	}
 }

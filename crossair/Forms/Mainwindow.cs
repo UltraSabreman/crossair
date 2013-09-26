@@ -35,7 +35,8 @@ namespace crossair {
 			this.Opacity = 0;
 
 			test.KeyPressed += new EventHandler<KeyPressedEventArgs>(hotkeyHandler);
-			test.RegisterHotKey(Keys.F12, Keys.LControlKey, Keys.A);
+			test.RegisterHotKey(Keys.F12);
+			
 
 			readOptions();
 		}
@@ -62,7 +63,15 @@ namespace crossair {
 
 
 		private void hotkeyHandler(object source, KeyPressedEventArgs e) {
-
+			if (e.Key.Keys.First() == Keys.F12) {
+				IntPtr test = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
+				Form lolwindow = Control.FromHandle(test) as Form;
+				try {
+					lolwindow.Opacity = 0.5;
+				} catch (NullReferenceException) {
+					MessageBox.Show("Null");
+				}
+			}
 		}
 
 		private void onTick(object source, EventArgs e) {
@@ -70,6 +79,7 @@ namespace crossair {
 
 			try {
 				GameWindow = Process.GetProcesses().FirstOrDefault(x => windowTitle.Match(x.MainWindowTitle).Success).MainWindowHandle; //change me
+
 				if (updateIcon) {
 					paused = false;
 					if (OverlayOn) {

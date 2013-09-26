@@ -10,13 +10,13 @@ using System.Runtime.InteropServices;
 /// Hot key struct, holds the actual key, and all the modifiers.
 /// </summary>
 public struct HotKey {
-	public Keys KeyCode;
-	public List<Keys> modifiers;
+	/// <summary>
+	/// Contians the hotkey and all modifiers (the first entery is the hotkey)
+	/// </summary>
+	public List<Keys> Keys;
 
-	public HotKey(Keys k, List<Keys> mod = null) {
-		KeyCode = k;
-
-		modifiers = mod;
+	public HotKey(List<Keys> mod) {
+		Keys = mod;
 	}
 }
 
@@ -40,17 +40,15 @@ public sealed class AsyncGlobalShortcuts : IDisposable {
 		while (flag) {
 			try {
 				foreach (HotKey k in keys) {
-					bool allModPressed = true;
-					if (k.modifiers != null) {
-						foreach (Keys modKey in k.modifiers) {
-							if (!isKeyPressed(modKey)) {
-								allModPressed = false;
-								break;
-							}
+					bool allPressed = true;
+					foreach (Keys modKey in k.Keys) {
+						if (!isKeyPressed(modKey)) {
+							allPressed = false;
+							break;
 						}
 					}
 
-					if (allModPressed && isKeyPressed(k.KeyCode) && KeyPressed != null)
+					if (allPressed && KeyPressed != null)
 						KeyPressed(this, new KeyPressedEventArgs(k));
 					
 				}
@@ -69,14 +67,13 @@ public sealed class AsyncGlobalShortcuts : IDisposable {
 	/// <summary>
 	/// Registers a hot key in the system with a variable amount of modifiers.
 	/// </summary>
-	/// <param name="hotkey">The hotkey</param>
-	/// <param name="modifiers">Any and all modifiers you wish to add</param>
-	public void RegisterHotKey(Keys hotkey, params object[] modifiers) {
+	/// <param name="hotkeys">Any and all modifiers you wish to add</param>
+	public void RegisterHotKey(params object[] hotkeys) {
 		List<Keys> temp = new List<Keys>();
-		foreach (Keys k in modifiers)
+		foreach (Keys k in hotkeys)
 			temp.Add(k);
 
-		keys.Add(new HotKey(hotkey, temp));
+		keys.Add(new HotKey(temp));
 	}
 
 	/// <summary>

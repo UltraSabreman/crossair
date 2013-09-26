@@ -52,24 +52,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncGlobalShortcuts.cs" />
-    <Compile Include="dataReader.cs" />
-    <Compile Include="Mainwindow.cs">
+    <Compile Include="Classes\AsyncGlobalShortcuts.cs" />
+    <Compile Include="Forms\bindButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\dataReader.cs" />
+    <Compile Include="Forms\Mainwindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Mainwindow.Designer.cs">
+    <Compile Include="Forms\Mainwindow.Designer.cs">
       <DependentUpon>Mainwindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TextEnterBox.cs">
+    <Compile Include="Classes\Program.cs" />
+    <Compile Include="Forms\Options.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TextEnterBox.Designer.cs">
+    <Compile Include="Forms\Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Forms\TextEnterBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TextEnterBox.Designer.cs">
       <DependentUpon>TextEnterBox.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Mainwindow.resx">
+    <EmbeddedResource Include="Forms\Mainwindow.resx">
       <DependentUpon>Mainwindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -81,7 +93,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="TextEnterBox.resx">
+    <EmbeddedResource Include="Forms\TextEnterBox.resx">
       <DependentUpon>TextEnterBox.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
@@ -95,7 +107,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="Misc\App.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\on.ico" />
@@ -104,7 +116,7 @@
     <None Include="Resources\off.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="paused.ico" />
+    <None Include="Misc\paused.ico" />
     <EmbeddedResource Include="Newtonsoft.Json.dll" />
     <Content Include="Resources\test.ico" />
   </ItemGroup>
