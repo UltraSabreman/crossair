@@ -63,7 +63,7 @@ namespace crossair {
 
 
 		private void hotkeyHandler(object source, KeyPressedEventArgs e) {
-			if (e.Key.Keys.First() == Keys.F12) {
+			if (e.Key.First() == Keys.F12) {
 				IntPtr test = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
 				Form lolwindow = Control.FromHandle(test) as Form;
 				try {

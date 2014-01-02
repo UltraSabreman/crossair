@@ -109,6 +109,7 @@ public sealed class AsyncGlobalShortcuts : IDisposable {
             } catch (System.InvalidOperationException) {
                 continue;
             }
+			Thread.Sleep(100);
         }
     }
 
