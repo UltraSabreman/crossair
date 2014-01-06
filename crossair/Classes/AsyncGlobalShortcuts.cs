@@ -63,55 +63,48 @@ public sealed class AsyncGlobalShortcuts : IDisposable {
     public event EventHandler<KeyPressedEventArgs> KeyUp;
     public event EventHandler<KeyPressedEventArgs> KeyPressed;
 
-    private static object threadLock = new object();
 
-    private Thread Listner = null;
-    static private bool flag = true;
+	private AutoResetEvent autoEvent;
+	private System.Threading.Timer keyTimer;
 
-
-    public AsyncGlobalShortcuts() {
-        Listner = new Thread(new ThreadStart(this.AsyncListener));
-        Listner.Name = "Async Global Shortcuts";
-        Listner.Start();
+	public AsyncGlobalShortcuts() {
+		autoEvent = new AutoResetEvent(false);
+		keyTimer = new System.Threading.Timer(CheckForKeys, autoEvent, 0, 10);
     }
 
-    private void AsyncListener() {
-        while (flag) {
-            try {
-                for (int i = 0; i < keys.Count; i++) {
-                    HotKey k = keys [i];
-                    bool allPressed = true;
-                    foreach (Keys key in k.KeyList) {
-                        if (!isKeyPressed(key)) {
-                            allPressed = false;
-                            break;
-                        }
-                    }
+	private void CheckForKeys(object call) {
+		try {
+			for (int i = 0; i < keys.Count; i++) {
+				HotKey k = keys [i];
+				bool allPressed = true;
+				foreach (Keys key in k.KeyList) {
+					if (!isKeyPressed(key)) {
+						allPressed = false;
+						break;
+					}
+				}
 
-                    if (allPressed && !k.isDown) {
-                        k.isDown = true;
+				if (allPressed && !k.isDown) {
+					k.isDown = true;
 
-                        if (KeyDown != null)
-                            KeyDown(this, new KeyPressedEventArgs(k));
-                    }
-                    if (!allPressed && k.isDown) {
-                        k.isDown = false;
+					if (KeyDown != null)
+						KeyDown(this, new KeyPressedEventArgs(k));
+				}
+				if (!allPressed && k.isDown) {
+					k.isDown = false;
 
-                        if (KeyUp != null)
-                            KeyUp(this, new KeyPressedEventArgs(k));
-                        if (KeyPressed != null)
-                            KeyPressed(this, new KeyPressedEventArgs(k));
-                        //for some odd reason, the above statement triggers the InvalidOperationException sometimes.
-                        //Not sure what the cause is, but keeping it as the last thing seems like a good idea for now
-                        //(aside from adding try{} blocks for each call)
-                    }
-                }
-            } catch (System.InvalidOperationException) {
-                continue;
-            }
-			Thread.Sleep(100);
-        }
-    }
+					if (KeyUp != null)
+						KeyUp(this, new KeyPressedEventArgs(k));
+					if (KeyPressed != null)
+						KeyPressed(this, new KeyPressedEventArgs(k));
+					//for some odd reason, the above statement triggers the InvalidOperationException sometimes.
+					//Not sure what the cause is, but keeping it as the last thing seems like a good idea for now
+					//(aside from adding try{} blocks for each call)
+				}
+			}
+		} catch (System.InvalidOperationException) {
+		}
+	}
 
     static private bool isKeyPressed(Keys code) {
         short result = GetAsyncKeyState(code);
@@ -159,8 +152,7 @@ public sealed class AsyncGlobalShortcuts : IDisposable {
     #region IDisposable Members
 
     public void Dispose() {
-        flag = false;
-        Listner.Abort();
+		keyTimer.Dispose();
         keys.Clear();
     }
 

@@ -24,13 +24,13 @@ namespace crossair {
 		public void deserialize() {
 			if (File.Exists(filePath)) {
 				try {
-					StreamReader fs = File.OpenText(filePath);
-					JsonConvert.PopulateObject(fs.ReadToEnd(), this); //#yolo
-					fs.Close();
+					using (StreamReader fs = File.OpenText(filePath)) {
+						JsonConvert.PopulateObject(fs.ReadToEnd(), this); //#yolo
+					}
 				} catch (Newtonsoft.Json.JsonSerializationException) {
-					StreamWriter fs = new StreamWriter(filePath);
-					fs.Write("{}");
-					fs.Close();
+					using (StreamWriter fs = new StreamWriter(filePath)) {
+						fs.Write("{}");
+					}
 
 				}
 
@@ -41,10 +41,10 @@ namespace crossair {
 		public void serialize() {
 			if (!File.Exists(filePath)) File.CreateText(filePath);
 
-			StreamWriter fs = new StreamWriter(filePath);
-			fs.Write(JsonConvert.SerializeObject(this, Formatting.Indented));
+			using (StreamWriter fs = new StreamWriter(filePath)) {
+				fs.Write(JsonConvert.SerializeObject(this, Formatting.Indented));
 
-			fs.Close();
+			}
 		}
 	}
 }

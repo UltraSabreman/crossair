@@ -21,6 +21,7 @@ namespace crossair {
 		private AsyncGlobalShortcuts test = new AsyncGlobalShortcuts();
 		private Regex windowTitle = new Regex("WINDOWTITLE", RegexOptions.Compiled);
 		private dataReader reader = new dataReader();
+
 		private bool updateIcon = false;
 
 		public Overlay() {
