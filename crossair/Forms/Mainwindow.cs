@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Windows.Interop;
+//using System.Windows
 
 using System.IO;
 using SFML.Graphics;
@@ -27,6 +29,8 @@ namespace crossair {
 		private RenderWindow mainWindow = null;
 		private DataReader reader = new DataReader();
 		private Config configs = new Config();
+
+		private System.Windows.Window testWindow = null;
 
 		public Overlay() {
 			InitializeComponent();
@@ -58,19 +62,23 @@ namespace crossair {
 		private void init() {
 			// Create the main window
 			mainWindow = new RenderWindow(new VideoMode(500, 500), "SFML window with OpenGL", Styles.None);
+			//mainWindow = new RenderWindow(this.Handle);
+
 
 			// Make it the active window for OpenGL calls
 			mainWindow.SetActive();
+			this.Size = new Size(0, 0);
+			//this.AllowTransparency = true;
 			//mainWindow.Closed += new EventHandler(OnClosed);
 
 			WindowsUtil.DWM_BLURBEHIND t = new WindowsUtil.DWM_BLURBEHIND();
 			t.dwFlags = WindowsUtil.DWM_BB.Enable;
 			t.fEnable = true;
 			t.hRgnBlur = new IntPtr();
-			WindowsUtil.DwmEnableBlurBehindWindow(mainWindow.SystemHandle, ref t);
-			WindowsUtil.EnableWindow(mainWindow.SystemHandle, false);
+			WindowsUtil.DwmEnableBlurBehindWindow(this.Handle, ref t);
+			//WindowsUtil.EnableWindow(this.Handle, false);
 
-			mainWindow.SetVisible(false);
+			//mainWindow.SetVisible(false);
 
 
 
@@ -89,7 +97,15 @@ namespace crossair {
 			//TODO: Look at bookmark for implimentation details on making this shit click through.
 			//Will most likely have to grab windows and actualy make them into classes.
 
+			//IntPtr handle = process.MainWindowHandle;
 
+			/*HwndSource hwndSource = HwndSource.FromHwnd(mainWindow.SystemHandle);
+
+			testWindow = hwndSource.RootVisual as System.Windows.Window;
+
+			testWindow.ShowInTaskbar = false;
+			testWindow.WindowStyle = System.Windows.WindowStyle.ToolWindow;
+			testWindow.AllowsTransparency = true;*/
 			
 
 			try {
@@ -117,8 +133,7 @@ namespace crossair {
 
 		private void hotkeyHandler(object source, KeyPressedEventArgs e) {
 			if (e.Key.First() == configs.ShowHideReticule.First()) {
-				IntPtr targetWindow = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
-
+				//IntPtr targetWindow = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
 				enabled = !enabled;
 			}
 		}
@@ -145,24 +160,28 @@ namespace crossair {
 				}
 			}
 
-			//if (!enabled) return;
+			if (!enabled) return;
 
 			if (WindowsUtil.GetForegroundWindow() != GameWindow) {
 				softPause = true;
+				this.Opacity = 0;
 				return;
 			} else {
 				softPause = false;
-				//WindowsUtil.BringWindowToTop(mainWindow.SystemHandle);
+				this.Opacity = 100;
+				WindowsUtil.BringWindowToTop(this.Handle);
 			}
 			
 			WindowsUtil.RECT tempSize = new WindowsUtil.RECT();
 			WindowsUtil.GetWindowRect(GameWindow, ref tempSize);
 
-			int newX = tempSize.Left + (tempSize.Right - tempSize.Left) / 2 - (int)mainWindow.Size.X/2;
-			int newY = tempSize.Top + (tempSize.Bottom - tempSize.Top) / 2 - (int)mainWindow.Size.Y/2;
+			int newX = tempSize.Left + (tempSize.Right - tempSize.Left) / 2 - this.Size.Width/2;
+			int newY = tempSize.Top + (tempSize.Bottom - tempSize.Top) / 2 - this.Size.Height/2;
+
+			this.Location = new Point(newX, newY);
 
 			//-1 == HWND_TOP											 SWP_SHOWWINDOW | SWP_NOSIZE
-			WindowsUtil.SetWindowPos(mainWindow.SystemHandle, -1, newX, newY, (int)mainWindow.Size.X, (int)mainWindow.Size.Y, 0x0040 | 0x0001);
+			WindowsUtil.SetWindowPos(this.Handle, -1, newX, newY, (int)this.Size.Width, (int)this.Size.Height, 0x0040 | 0x0001);
 		}
 
 		private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e) {
@@ -196,12 +215,13 @@ namespace crossair {
 			while (tryLoading) {
 				try {
 					reticule = new Sprite(new Texture(configs.ReticulePath) { Smooth = true });
-					mainWindow.Size = reticule.Texture.Size;
+					//reticule.Texture.CPointer
+					this.Size = new Size((int)reticule.Texture.Size.X, (int)reticule.Texture.Size.Y);
 
-					/*Vector2f size = new Vector2f(reticule.Texture.Size.X, reticule.Texture.Size.Y);
+					Vector2f size = new Vector2f(reticule.Texture.Size.X, reticule.Texture.Size.Y);
 					Vector2f offset = new Vector2f(reticule.Texture.Size.X / 2, reticule.Texture.Size.Y / 2);
 
-					mainWindow.SetView(new SFML.Graphics.View() { Size = size, Center = offset });*/
+					mainWindow.SetView(new SFML.Graphics.View() { Size = size, Center = offset });
 					tryLoading = false;
 
 				} catch (SFML.LoadingFailedException) {
@@ -219,15 +239,15 @@ namespace crossair {
 			get {
 				CreateParams cp = base.CreateParams;
 				//cp.ExStyle |= 0x80; //WS_EX_TOOLWINDOW
-				////cp.ExStyle |= 0x00000020; // WS_EX_TRANSPARENT
+				//cp.ExStyle |= 0x00000020; // WS_EX_TRANSPARENT
 				return cp;
 			}
 		}
 
 
-		protected override bool ShowWithoutActivation {
-			get { return true; }
-		}
+		/*protected override bool ShowWithoutActivation {
+			get { return false; }
+		}*/
 
 		/////////////////////
 		// invoked dll bs

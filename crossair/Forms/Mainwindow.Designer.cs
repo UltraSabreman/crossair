@@ -29,14 +29,12 @@
 			this.TrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.toggleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exitWithGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.ReloadImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.DrawSpace = new System.Windows.Forms.PictureBox();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.TrayContextMenu.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.DrawSpace)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// TrayIcon
@@ -57,7 +55,7 @@
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
 			this.TrayContextMenu.Name = "TrayContextMenu";
-			this.TrayContextMenu.Size = new System.Drawing.Size(175, 148);
+			this.TrayContextMenu.Size = new System.Drawing.Size(175, 126);
 			// 
 			// toggleToolStripMenuItem
 			// 
@@ -73,24 +71,17 @@
 			this.exitWithGameToolStripMenuItem.Text = "Exit With Game";
 			this.exitWithGameToolStripMenuItem.Click += new System.EventHandler(this.exitWithGameToolStripMenuItem_Click);
 			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(171, 6);
+			// 
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
 			this.optionsToolStripMenuItem.Text = "Set Target Window";
 			this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator1
-			// 
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(171, 6);
-			// 
-			// exitToolStripMenuItem
-			// 
-			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-			this.exitToolStripMenuItem.Text = "Exit";
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
 			// ReloadImageMenuItem
 			// 
@@ -99,21 +90,17 @@
 			this.ReloadImageMenuItem.Text = "Reload Image";
 			this.ReloadImageMenuItem.Click += new System.EventHandler(this.ReloadImageMenuItem_Click);
 			// 
-			// DrawSpace
-			// 
-			this.DrawSpace.BackColor = System.Drawing.Color.Transparent;
-			this.DrawSpace.ErrorImage = null;
-			this.DrawSpace.InitialImage = null;
-			this.DrawSpace.Location = new System.Drawing.Point(0, 0);
-			this.DrawSpace.Name = "DrawSpace";
-			this.DrawSpace.Size = new System.Drawing.Size(256, 256);
-			this.DrawSpace.TabIndex = 0;
-			this.DrawSpace.TabStop = false;
-			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
 			this.toolStripSeparator2.Size = new System.Drawing.Size(171, 6);
+			// 
+			// exitToolStripMenuItem
+			// 
+			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+			this.exitToolStripMenuItem.Text = "Exit";
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
 			// Overlay
 			// 
@@ -121,7 +108,6 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(256, 256);
 			this.ControlBox = false;
-			this.Controls.Add(this.DrawSpace);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
@@ -133,7 +119,6 @@
 			this.TopMost = true;
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Overlay_FormClosing);
 			this.TrayContextMenu.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.DrawSpace)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -141,7 +126,6 @@
 		#endregion
 
 		private System.Windows.Forms.NotifyIcon TrayIcon;
-		private System.Windows.Forms.PictureBox DrawSpace;
 		private System.Windows.Forms.ContextMenuStrip TrayContextMenu;
 		private System.Windows.Forms.ToolStripMenuItem toggleToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem exitWithGameToolStripMenuItem;
