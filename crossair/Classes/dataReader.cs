@@ -7,13 +7,10 @@ using Newtonsoft.Json;
 
 
 namespace crossair {
-	class dataReader {
-		public bool closeWithGame = true;
-		public string gameWindowTitle = "Calculator";
+	class DataReader {
+		private String filePath = "data.json";
 
-		private string filePath = "data.json";
-
-		public dataReader(string path = "") {
+		public DataReader(string path = "") {
 			if (path == "" || path == null) return;
 			if (!File.Exists(path))
 				throw (new System.IO.FileNotFoundException());
@@ -21,11 +18,11 @@ namespace crossair {
 				filePath = path;
 		}
 
-		public void deserialize() {
+		public void Deserialize(Config toFill) {
 			if (File.Exists(filePath)) {
 				try {
 					using (StreamReader fs = File.OpenText(filePath)) {
-						JsonConvert.PopulateObject(fs.ReadToEnd(), this); //#yolo
+						JsonConvert.PopulateObject(fs.ReadToEnd(), toFill); //#yolo
 					}
 				} catch (Newtonsoft.Json.JsonSerializationException) {
 					using (StreamWriter fs = new StreamWriter(filePath)) {
@@ -33,16 +30,15 @@ namespace crossair {
 					}
 
 				}
-
-				
-			}
+			} else
+				throw new FileNotFoundException();
 		}
 
-		public void serialize() {
+		public void Serialize(Config toFill) {
 			if (!File.Exists(filePath)) File.CreateText(filePath);
 
 			using (StreamWriter fs = new StreamWriter(filePath)) {
-				fs.Write(JsonConvert.SerializeObject(this, Formatting.Indented));
+				fs.Write(JsonConvert.SerializeObject(toFill, Formatting.Indented));
 
 			}
 		}

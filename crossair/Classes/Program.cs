@@ -4,57 +4,60 @@ using SFML;
 using SFML.Window;
 using SFML.Graphics;
 using System.Windows.Forms;
-
-//using Tao.OpenGl;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace crossair {
 	static class Program {
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
+		static Sprite reticule = null;
+		static RenderWindow mainWindow = null;
+		static DataReader reader = new DataReader();
+		static Config configs = new Config();
+
 		static void Main() {
-			// Request a 32-bits depth buffer when creating the window
-			ContextSettings contextSettings = new ContextSettings();
-			contextSettings.DepthBits = 32;
+			init();
 
+			bool tryLoading = true;
+			while (tryLoading) {
+				try {
+					reticule = new Sprite(new Texture("ret.png") { Smooth = true });
+					mainWindow.Size = reticule.Texture.Size;
+					tryLoading = false;
+				} catch (SFML.LoadingFailedException) {
+					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
+						System.Environment.Exit(0);
+				} catch (NullReferenceException) {
+					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
+						System.Environment.Exit(0);
+				}
+			}
+
+			while (mainWindow.IsOpen()) {
+				mainWindow.DispatchEvents();
+				mainWindow.Clear(new Color(0, 0, 0, 0));
+
+				mainWindow.Draw(reticule);
+				mainWindow.Display();
+			}
+		}
+
+		static void init() {
 			// Create the main window
-			RenderWindow window = new RenderWindow(new VideoMode(640, 480), "SFML window with OpenGL", Styles.None);
-
+			mainWindow = new RenderWindow(new VideoMode(640, 480), "SFML window with OpenGL", Styles.None);
 
 			// Make it the active window for OpenGL calls
-			window.SetActive();
-
-			// Setup event handlers
-			window.Closed += new EventHandler(OnClosed);
-			window.KeyPressed += new EventHandler<SFML.Window.KeyEventArgs>(OnKeyPressed);
-			window.Resized += new EventHandler<SizeEventArgs>(OnResized);
-			CircleShape shape = new CircleShape(100);
-			shape.FillColor = new Color(0,255,0,150);
-
-			//SetWindowLong(window.SystemHandle, )
-
-
+			mainWindow.SetActive();
+			mainWindow.Closed += new EventHandler(OnClosed);
 
 			WindowsUtil.DWM_BLURBEHIND t = new WindowsUtil.DWM_BLURBEHIND();
 			t.dwFlags = WindowsUtil.DWM_BB.Enable;
 			t.fEnable = true;
 			t.hRgnBlur = new IntPtr();
-			WindowsUtil.DwmEnableBlurBehindWindow(window.SystemHandle, ref t);
-
-
-
-			// Start the game loop
-			while (window.IsOpen()) {
-				// Process events
-				window.DispatchEvents();
-				window.Clear(new Color(0,0,0,0));
-				//Gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
-				// Finally, display the rendered frame on screen
-				window.Draw(shape);
-				window.Display();
-			}
+			WindowsUtil.DwmEnableBlurBehindWindow(mainWindow.SystemHandle, ref t);
+			try {
+				reader.Deserialize(configs);
+			} catch (FileNotFoundException ) { }
 		}
 
 		/// <summary>
@@ -63,22 +66,6 @@ namespace crossair {
 		static void OnClosed(object sender, EventArgs e) {
 			Window window = (Window)sender;
 			window.Close();
-		}
-
-		/// <summary>
-		/// Function called when a key is pressed
-		/// </summary>
-		static void OnKeyPressed(object sender, SFML.Window.KeyEventArgs e) {
-			Window window = (Window)sender;
-			if (e.Code == Keyboard.Key.Escape)
-				window.Close();
-		}
-
-		/// <summary>
-		/// Function called when the window is resized
-		/// </summary>
-		static void OnResized(object sender, SizeEventArgs e) {
-			//Gl.glViewport(0, 0, (int)e.Width, (int)e.Height);
 		}
 	}
 

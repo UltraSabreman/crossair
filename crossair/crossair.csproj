@@ -77,11 +77,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\AsyncGlobalShortcuts.cs" />
+    <Compile Include="Classes\Config.cs" />
     <Compile Include="Classes\WindowsUtil.cs" />
     <Compile Include="Forms\bindButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Classes\dataReader.cs" />
+    <Compile Include="Classes\DataReader.cs" />
     <Compile Include="Forms\Mainwindow.cs">
       <SubType>Form</SubType>
     </Compile>

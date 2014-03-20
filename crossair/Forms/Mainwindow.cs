@@ -20,9 +20,10 @@ namespace crossair {
 		private Timer refresh = new System.Windows.Forms.Timer();
 		private AsyncGlobalShortcuts test = new AsyncGlobalShortcuts();
 		private Regex windowTitle = new Regex("WINDOWTITLE", RegexOptions.Compiled);
-		private dataReader reader = new dataReader();
+		private DataReader reader = new DataReader();
 
 		private bool updateIcon = false;
+
 
 		public Overlay() {
 			InitializeComponent();
@@ -43,9 +44,10 @@ namespace crossair {
 		}
 
 		private void readOptions() {
-			reader.deserialize();
-			windowTitle = new Regex(reader.gameWindowTitle, RegexOptions.Compiled);
-			ExitWithGame = reader.closeWithGame;
+			//TODO fix me
+			//reader.Deserialize();
+			//windowTitle = new Regex(reader.gameWindowTitle, RegexOptions.Compiled);
+			//ExitWithGame = reader.closeWithGame;
 			exitToolStripMenuItem.Checked = ExitWithGame;
 			toggleToolStripMenuItem.Checked = OverlayOn;
 		}
@@ -56,9 +58,9 @@ namespace crossair {
 			string title = windowTitle.ToString();
 			if (title == null)
 				title = "";
-			reader.gameWindowTitle = title;
-			reader.closeWithGame = ExitWithGame;
-			reader.serialize();
+			//reader.gameWindowTitle = title;
+			//reader.closeWithGame = ExitWithGame;
+			//reader.serialize();
 			test.Dispose();
 		}
 
