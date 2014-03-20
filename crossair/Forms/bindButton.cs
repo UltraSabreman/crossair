@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using SFML;
+using SFML.Window;
 
 namespace crossair {
 	class bindButton : System.Windows.Forms.Button {
@@ -79,7 +81,7 @@ namespace crossair {
 
 			this.Refresh();
 		}
-		protected override void OnKeyDown(KeyEventArgs kevent) {
+		protected override void OnKeyDown(System.Windows.Forms.KeyEventArgs kevent) {
 			if (!enterKeys) {
 				if (kevent.KeyCode == Keys.Escape && !holdEscape) {
 					holdEscape = true;
@@ -99,7 +101,8 @@ namespace crossair {
 			base.OnKeyDown(kevent);
 		}
 
-		protected override void OnKeyUp(KeyEventArgs kevent) {
+
+		protected override void OnKeyUp(System.Windows.Forms.KeyEventArgs kevent) {
 			if (enterKeys) {
 				keyBind.Clear();
 				foreach (Keys k in tempKeys)

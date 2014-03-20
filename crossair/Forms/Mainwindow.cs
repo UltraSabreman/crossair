@@ -111,17 +111,17 @@ namespace crossair {
 
 			if (!OverlayOn) return;
 
-			if (GetForegroundWindow() != GameWindow) {
+			if (WindowsUtil.GetForegroundWindow() != GameWindow) {
 				this.Opacity = 0;
 				return;
 			} else {
 				this.Opacity = 100;
-				BringWindowToTop(this.Handle);
+				WindowsUtil.BringWindowToTop(this.Handle);
 			}
-			
 
-			RECT tempSize = new RECT();
-			GetWindowRect(GameWindow, ref tempSize);
+
+			WindowsUtil.RECT tempSize = new WindowsUtil.RECT();
+			WindowsUtil.GetWindowRect(GameWindow, ref tempSize);
 
 			int newX = tempSize.Left + (tempSize.Right - tempSize.Left) / 2 - this.Size.Width/2;
 			int newY = tempSize.Top + (tempSize.Bottom - tempSize.Top) / 2 - this.Size.Height/2;
@@ -201,25 +201,7 @@ namespace crossair {
 		/////////////////////
 		// invoked dll bs
 
-		[DllImport("user32.dll", SetLastError = true)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		static extern bool GetWindowRect(IntPtr hWnd, ref RECT lpRect);
-
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern IntPtr GetForegroundWindow();
-
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool BringWindowToTop(IntPtr hWnd);
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct RECT
-		{
-			public int Left;
-			public int Top;
-			public int Right;
-			public int Bottom;
-		}
-
+		
 		private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
 			onExit();
 			this.Close();
