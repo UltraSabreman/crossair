@@ -6,8 +6,9 @@ using System.Windows.Forms;
 
 namespace crossair{
 	class Config {
-		public bool ExitWithProgram = true;
+		public bool ExitWithProgram = false;
 		public String ReticulePath = "ret.png";
+		public String TargetWindowTitle = "Calculator";
 		public HotKey ShowHideReticule = new HotKey(Keys.F4);
 	}
 }

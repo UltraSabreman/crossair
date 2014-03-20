@@ -11,45 +11,93 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
+using System.IO;
+using SFML.Graphics;
+using SFML.Window;
+
 namespace crossair {
 	public partial class Overlay : Form {
-		private bool OverlayOn = true;
-		private bool ExitWithGame = true;
-		private bool paused = false;
-		private Bitmap Reticule = null;
+		private bool enabled = false;
+		private bool softPause = false;
 		private Timer refresh = new System.Windows.Forms.Timer();
-		private AsyncGlobalShortcuts test = new AsyncGlobalShortcuts();
-		private Regex windowTitle = new Regex("WINDOWTITLE", RegexOptions.Compiled);
+		private AsyncGlobalShortcuts keyListner = new AsyncGlobalShortcuts();
+		private Regex windowTitle = null;
+
+		private Sprite reticule = null;
+		private RenderWindow mainWindow = null;
 		private DataReader reader = new DataReader();
-
-		private bool updateIcon = false;
-
+		private Config configs = new Config();
 
 		public Overlay() {
 			InitializeComponent();
 
+			init();
+
 			loadImage();
 
+			windowTitle = new Regex(configs.TargetWindowTitle, RegexOptions.Compiled);
+			
 			refresh.Interval = 1000;
 			refresh.Tick += new EventHandler(onTick);
 			refresh.Start();
 
-			this.Opacity = 0;
+			keyListner.KeyPressed += new EventHandler<KeyPressedEventArgs>(hotkeyHandler);
+			keyListner.RegisterHotKey(configs.ShowHideReticule);
 
-			test.KeyPressed += new EventHandler<KeyPressedEventArgs>(hotkeyHandler);
-			test.RegisterHotKey(Keys.F12);
-			
+			while (mainWindow.IsOpen()) {
+				mainWindow.DispatchEvents();
+				mainWindow.Clear(new SFML.Graphics.Color(0, 0, 0, 0));
 
-			readOptions();
+				if (enabled && !softPause)
+					mainWindow.Draw(reticule);
+
+				mainWindow.Display();
+			}
 		}
 
-		private void readOptions() {
-			//TODO fix me
-			//reader.Deserialize();
-			//windowTitle = new Regex(reader.gameWindowTitle, RegexOptions.Compiled);
-			//ExitWithGame = reader.closeWithGame;
-			exitToolStripMenuItem.Checked = ExitWithGame;
-			toggleToolStripMenuItem.Checked = OverlayOn;
+		private void init() {
+			// Create the main window
+			mainWindow = new RenderWindow(new VideoMode(500, 500), "SFML window with OpenGL", Styles.None);
+
+			// Make it the active window for OpenGL calls
+			mainWindow.SetActive();
+			//mainWindow.Closed += new EventHandler(OnClosed);
+
+			WindowsUtil.DWM_BLURBEHIND t = new WindowsUtil.DWM_BLURBEHIND();
+			t.dwFlags = WindowsUtil.DWM_BB.Enable;
+			t.fEnable = true;
+			t.hRgnBlur = new IntPtr();
+			WindowsUtil.DwmEnableBlurBehindWindow(mainWindow.SystemHandle, ref t);
+			WindowsUtil.EnableWindow(mainWindow.SystemHandle, false);
+
+			mainWindow.SetVisible(false);
+
+
+
+			/*// 0x00000020 = WS_EX_TRANSPARENT
+			// 0x80 = WS_EX_TOOLWINDOW
+			//-20 = GWL_EXSTYLE
+			WindowsUtil.SetWindowLongPtr32(mainWindow.SystemHandle, -20, 0x00000020 | 0x80);
+			//-16 = GWL_STYLE
+			//0x80000000 == WS_POPUP
+			//IntPtr test = new IntPtr(0x80000000L);
+			WindowsUtil.SetWindowLongPtr32(mainWindow.SystemHandle, -16, 0x80000000L);
+			//WindowsUtil.SetWindowPos(mainWindow.SystemHandle, 0, 0, 0, 0, 0, 0);*/
+			//long test = WindowsUtil.GetWindowLongPtr32(mainWindow.SystemHandle, -20);
+			//WindowsUtil.SetWindowLongPtr32(mainWindow.SystemHandle, -20, test | 0x00080000L);
+
+			//TODO: Look at bookmark for implimentation details on making this shit click through.
+			//Will most likely have to grab windows and actualy make them into classes.
+
+
+			
+
+			try {
+				reader.Deserialize(configs);
+			} catch (FileNotFoundException) { }
+
+			exitToolStripMenuItem.Checked = configs.ExitWithProgram;
+			toggleToolStripMenuItem.Checked = enabled;
 		}
 
 		private void onExit() {
@@ -58,22 +106,20 @@ namespace crossair {
 			string title = windowTitle.ToString();
 			if (title == null)
 				title = "";
-			//reader.gameWindowTitle = title;
-			//reader.closeWithGame = ExitWithGame;
-			//reader.serialize();
-			test.Dispose();
+
+			reader.Serialize(configs);
+			//Window window = (Window)sender;
+			//window.Close();
+			mainWindow.Close();
+			//keyListner.Dispose();
 		}
 
 
 		private void hotkeyHandler(object source, KeyPressedEventArgs e) {
-			if (e.Key.First() == Keys.F12) {
-				IntPtr test = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
-				Form lolwindow = Control.FromHandle(test) as Form;
-				try {
-					lolwindow.Opacity = 0.5;
-				} catch (NullReferenceException) {
-					MessageBox.Show("Null");
-				}
+			if (e.Key.First() == configs.ShowHideReticule.First()) {
+				IntPtr targetWindow = Process.GetProcesses().FirstOrDefault().MainWindowHandle;
+
+				enabled = !enabled;
 			}
 		}
 
@@ -81,54 +127,42 @@ namespace crossair {
 			IntPtr GameWindow = new IntPtr();
 
 			try {
-				GameWindow = Process.GetProcesses().FirstOrDefault(x => windowTitle.Match(x.MainWindowTitle).Success).MainWindowHandle; //change me
+				GameWindow = Process.GetProcesses().FirstOrDefault(x => windowTitle.Match(x.MainWindowTitle).Success).MainWindowHandle;
 
-				if (updateIcon) {
-					paused = false;
-					if (OverlayOn) {
-						TrayIcon.Icon = crossair.Properties.Resources.on;
-						this.Opacity = 100;
-					} else {
-						TrayIcon.Icon = crossair.Properties.Resources.off;
-						this.Opacity = 0;
-					}
-
-					paused = true;
-					updateIcon = false;
+				if (enabled) {
+					TrayIcon.Icon = crossair.Properties.Resources.on;
+				} else {
+					TrayIcon.Icon = crossair.Properties.Resources.off;
 				}
+			
 			} catch (System.NullReferenceException) {
-				if (ExitWithGame) {
+				if (configs.ExitWithProgram) {
 					this.Close();
 					return;
 				} else {
-					if (!updateIcon) {
-						TrayIcon.Icon = crossair.Properties.Resources.paused;
-						this.Opacity = 0;
-						paused = true;
-						updateIcon = true;
-					}
+					TrayIcon.Icon = crossair.Properties.Resources.paused;
 					return;
 				}
 			}
 
-			if (!OverlayOn) return;
+			//if (!enabled) return;
 
 			if (WindowsUtil.GetForegroundWindow() != GameWindow) {
-				this.Opacity = 0;
+				softPause = true;
 				return;
 			} else {
-				this.Opacity = 100;
-				WindowsUtil.BringWindowToTop(this.Handle);
+				softPause = false;
+				//WindowsUtil.BringWindowToTop(mainWindow.SystemHandle);
 			}
-
-
+			
 			WindowsUtil.RECT tempSize = new WindowsUtil.RECT();
 			WindowsUtil.GetWindowRect(GameWindow, ref tempSize);
 
-			int newX = tempSize.Left + (tempSize.Right - tempSize.Left) / 2 - this.Size.Width/2;
-			int newY = tempSize.Top + (tempSize.Bottom - tempSize.Top) / 2 - this.Size.Height/2;
-			
-			this.Location = new Point(newX, newY);
+			int newX = tempSize.Left + (tempSize.Right - tempSize.Left) / 2 - (int)mainWindow.Size.X/2;
+			int newY = tempSize.Top + (tempSize.Bottom - tempSize.Top) / 2 - (int)mainWindow.Size.Y/2;
+
+			//-1 == HWND_TOP											 SWP_SHOWWINDOW | SWP_NOSIZE
+			WindowsUtil.SetWindowPos(mainWindow.SystemHandle, -1, newX, newY, (int)mainWindow.Size.X, (int)mainWindow.Size.Y, 0x0040 | 0x0001);
 		}
 
 		private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e) {
@@ -144,44 +178,37 @@ namespace crossair {
 		}
 
 		private void toggle() {
-			if (paused) return;
+			if (softPause) return;
 
-			OverlayOn = !OverlayOn;
+			enabled = !enabled;
 
-			if (OverlayOn) {
+			if (enabled) {
 				toggleToolStripMenuItem.Checked = true;
 				TrayIcon.Icon = crossair.Properties.Resources.on;
-				this.Opacity = 100;
 			} else {
 				toggleToolStripMenuItem.Checked = false;
 				TrayIcon.Icon = crossair.Properties.Resources.off;
-				this.Opacity = 0;
 			}
 		}
 
 		private void loadImage() {
-			if (Reticule != null)
-				Reticule.Dispose();
-
-			while (true) {
+			bool tryLoading = true;
+			while (tryLoading) {
 				try {
-					Bitmap tempBMP = new Bitmap("ret.bmp");
-					Reticule = new Bitmap(tempBMP);
-					tempBMP.Dispose();
+					reticule = new Sprite(new Texture(configs.ReticulePath) { Smooth = true });
+					mainWindow.Size = reticule.Texture.Size;
 
-					this.Size = Reticule.Size;
-					DrawSpace.Size = Reticule.Size;
+					/*Vector2f size = new Vector2f(reticule.Texture.Size.X, reticule.Texture.Size.Y);
+					Vector2f offset = new Vector2f(reticule.Texture.Size.X / 2, reticule.Texture.Size.Y / 2);
 
-					this.TransparencyKey = Reticule.GetPixel(0, 0);
-					this.BackColor = this.TransparencyKey;
-					DrawSpace.Image = Reticule;
-					DrawSpace.Refresh();
-					return;
-				} catch (System.IO.FileNotFoundException) {
+					mainWindow.SetView(new SFML.Graphics.View() { Size = size, Center = offset });*/
+					tryLoading = false;
+
+				} catch (SFML.LoadingFailedException) {
 					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
 						System.Environment.Exit(0);
-				} catch (System.ArgumentException) {
-					if (MessageBox.Show("Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
+				} catch (NullReferenceException) {
+					if (MessageBox.Show("NULL, Reticule File Not Found, press OK to retry, Cancel to quit", "Error Loading File", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.Cancel)
 						System.Environment.Exit(0);
 				}
 			}
@@ -191,11 +218,13 @@ namespace crossair {
 		protected override CreateParams CreateParams {
 			get {
 				CreateParams cp = base.CreateParams;
-				cp.ExStyle |= 0x80; //WS_EX_TOOLWINDOW
-				cp.ExStyle |= 0x00000020; // WS_EX_TRANSPARENT
+				//cp.ExStyle |= 0x80; //WS_EX_TOOLWINDOW
+				////cp.ExStyle |= 0x00000020; // WS_EX_TRANSPARENT
 				return cp;
 			}
 		}
+
+
 		protected override bool ShowWithoutActivation {
 			get { return true; }
 		}
@@ -229,8 +258,8 @@ namespace crossair {
 		}
 
 		private void exitWithGameToolStripMenuItem_Click(object sender, EventArgs e) {
-			ExitWithGame = !ExitWithGame;
-			exitWithGameToolStripMenuItem.Checked = ExitWithGame;
+			configs.ExitWithProgram = !configs.ExitWithProgram;
+			exitWithGameToolStripMenuItem.Checked = configs.ExitWithProgram;
 		}
 
 		private void toggleToolStripMenuItem_Click(object sender, EventArgs e) {

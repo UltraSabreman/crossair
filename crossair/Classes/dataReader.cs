@@ -39,7 +39,6 @@ namespace crossair {
 
 			using (StreamWriter fs = new StreamWriter(filePath)) {
 				fs.Write(JsonConvert.SerializeObject(toFill, Formatting.Indented));
-
 			}
 		}
 	}
